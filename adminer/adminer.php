@@ -15,7 +15,7 @@ class Adminer
 
     public function __construct()
     {
-        $config = require(__DIR__ . '/../config.php');
+        $config = json_decode(file_get_contents(__DIR__ . '/../app-config.json'), true);
         $this->version = $config['version'];
 
         $this->stdin = fopen('php://stdin', 'r');
@@ -32,7 +32,6 @@ class Adminer
     {
         // Reset the tty back to the original configuration
         system('stty -cbreak echo');
-//        system("stty '" . $this->ttyTerm . "'");
     }
 
     public function execute()
@@ -62,7 +61,6 @@ class Adminer
         // Move to first line
         for ($i = 0; $i < $this->printedLines; $i++) {
             echo "\r\033[K\033[1A\r\033[K\r";
-//            echo "\r\033[1A\r";
         }
 
         $runtimeDir = __DIR__ . '/../runtime/';

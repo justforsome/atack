@@ -22,61 +22,25 @@ class Requester
 
     private $isInitialized = false;
 
-    private $appConfig;
+    private $config;
 
-    private $runtimeConfig;
-
-    public function __construct($filename)
+    public function __construct($config, $filename)
     {
         $this->filename = $filename;
 
-        $this->appConfig = require(__DIR__ . '/../config.php');
+        // Required config
+        if(!isset($this->config['hostsLocation'])) {
+            throw new \Exception('Requester is not configured properly');
+        }
+        $this->config = $config;
 
         $this->isInitialized = $this->initialize();
     }
 
     public function initialize(): bool
     {
-        // reading config; check for updates
-        $runtimeDir = dirname($this->filename);
-        chdir($runtimeDir);
-
-        $configFilename = $runtimeDir . '/config.json';
-        if(file_exists($configFilename)) {
-            if(is_readable($configFilename)) {
-                $this->runtimeConfig = json_decode(file_get_contents($configFilename), true);
-                $configLoaded = true;
-            } else {
-                unlink($configFilename);
-                $configLoaded = false;
-            }
-        } else {
-            $configLoaded = false;
-        }
-
-        if(!$configLoaded) {
-            $this->runtimeConfig = [
-                'checkForUpdates' => true,
-                'uid' => uniqid(),
-            ];
-            file_put_contents($configFilename, json_encode($this->runtimeConfig));
-
-            // prevent from race condition
-            return false;
-        }
-
-        $content = file_get_contents('http://atack.just-for-some.fun/hosts.json');
+        $content = file_get_contents($this->config['hostsLocation']);
         $contentArray = json_decode($content, true);
-
-        if(
-            isset($this->runtimeConfig['checkForUpdates']) && $this->runtimeConfig['checkForUpdates'] &&
-            isset($contentArray['config']['version'])
-        ) {
-            if(version_compare($contentArray['config']['version'], $this->appConfig['version'], '>')) {
-                exec('git pull');
-                return false;
-            }
-        }
 
         $hosts = $contentArray['hosts'];
 
