@@ -78,7 +78,7 @@ if(
 if($runtimeExists) {
     $files = scandir($runtimeDir);
     foreach($files as $file) {
-        if(in_array($file, ['.', '..'])) {
+        if(in_array($file, ['.', '..', 'config.json'])) {
             continue;
         }
 

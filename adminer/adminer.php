@@ -73,13 +73,17 @@ class Adminer
             $numeratorTotal = .0;
             $denominatorTotal = .0;
             foreach ($files as $file) {
-                if (in_array($file, ['.', '..'])) {
+                if (in_array($file, ['.', '..', 'config.json'])) {
                     continue;
                 }
 
                 try {
                     $data = unserialize(file_get_contents($runtimeDir . '/' . $file));
+                } catch (\Exception $ex) {
+                    continue;
+                }
 
+                try {
                     if(!isset($data['url'], $data['requestLog']) || !is_iterable($data['requestLog'])) {
                         continue;
                     }

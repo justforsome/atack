@@ -29,7 +29,7 @@ class Requester
         $this->filename = $filename;
 
         // Required config
-        if(!isset($this->config['hostsLocation'])) {
+        if(!isset($config['hostsLocation'])) {
             throw new \Exception('Requester is not configured properly');
         }
         $this->config = $config;
@@ -159,7 +159,7 @@ class Requester
     protected function flushStatus()
     {
         file_put_contents($this->filename, serialize([
-            'url' => $this->site['page'],
+            'url' => $this->site['page'] . (isset($this->site['url']) ? " [{$this->site['url']}]" : ''),
             'startTime' => $this->startTime,
             'endTime' => new \DateTime(),
             'requestLog' => $this->requestLog,
