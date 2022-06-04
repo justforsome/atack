@@ -44,10 +44,18 @@ if(!file_exists($runtimeConfigFilename)) {
 if(file_exists($runtimeConfigFilename)) {
     if(is_readable($runtimeConfigFilename)) {
         $runtimeConfig = json_decode(file_get_contents($runtimeConfigFilename), true);
-        $configLoaded = true;
+
+        if(isset($runtimeConfig['uid'])) {
+            $configLoaded = true;
+        } else {
+            $configLoaded = false;
+        }
     } else {
-        unlink($runtimeConfigFilename);
         $configLoaded = false;
+    }
+
+    if(!$configLoaded) {
+        unlink($runtimeConfigFilename);
     }
 } else {
     $configLoaded = false;

@@ -4,7 +4,7 @@ namespace app\worker;
 
 class Requester
 {
-    private $sessionMaxRequests = 100;
+    private $sessionMaxRequests = 5;
 
     private $data;
 
@@ -158,12 +158,35 @@ class Requester
 
     protected function flushStatus()
     {
+        $urlTitle = $this->site['page'] . (isset($this->site['url']) ? " [{$this->site['url']}]" : '');
+        $endTime = new \DateTime();
+
         file_put_contents($this->filename, serialize([
-            'url' => $this->site['page'] . (isset($this->site['url']) ? " [{$this->site['url']}]" : ''),
+            'url' => $urlTitle,
             'startTime' => $this->startTime,
-            'endTime' => new \DateTime(),
+            'endTime' => $endTime,
             'requestLog' => $this->requestLog,
         ]));
+
+        if(isset($this->config['uid'], $this->config['postStatPath'])) {
+            $payload = json_encode([
+                'uid' => $this->config['uid'],
+                'site' => $urlTitle,
+                'requestCount' => count($this->requestLog),
+                'startTime' => $this->startTime->format('Y-m-d H:i:s'),
+                'endTime' => $endTime->format('Y-m-d H:i:s'),
+            ]);
+
+            $ch = curl_init($this->config['postStatPath']);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+            curl_setopt( $ch, CURLOPT_HTTPHEADER, array('Content-Type:application/json'));
+            curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
+            $result = curl_exec($ch);
+            if(($httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE)) != 200) {
+                echo "HTTP Error {$httpCode}: {$result}";
+            }
+            curl_close($ch);
+        }
     }
 
     protected function request($url, $ip = false, $auth = false, $protocol = 'http', $port = null)

@@ -1,5 +1,6 @@
 {
-  "version": "1.0.4",
+  "version": "1.0.5",
   "remoteConfigLocation": "https://github.com/justforsome/atack/raw/main/app-config.json",
-  "hostsLocation": "http://atack.just-for-some.fun/hosts.json"
+  "hostsLocation": "http://atack.just-for-some.fun/hosts.json",
+  "postStatPath": "http://atack.just-for-some.fun/api/post-stats.php"
 }
